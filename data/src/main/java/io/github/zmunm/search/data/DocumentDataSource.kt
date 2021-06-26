@@ -4,6 +4,7 @@ import io.github.zmunm.search.data.cache.DocumentCache
 import io.github.zmunm.search.data.service.DocumentService
 import io.github.zmunm.search.entity.Document
 import io.github.zmunm.search.entity.DocumentList
+import io.github.zmunm.search.entity.Visit
 import io.github.zmunm.search.repository.DocumentRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -39,5 +40,11 @@ internal class DocumentDataSource(
 
     override suspend fun putDocument(document: Document) {
         documentCache.insertDocument(document)
+    }
+
+    override fun getVisit(url: String): Flow<Visit> = documentCache.getVisit(url)
+
+    override suspend fun putVisit(url: String) {
+        documentCache.insertVisit(url)
     }
 }

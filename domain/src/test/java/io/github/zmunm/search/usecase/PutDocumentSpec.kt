@@ -19,15 +19,15 @@ internal class PutDocumentSpec : DescribeSpec({
         documentRepository = documentRepository
     )
 
-    describe("put like") {
-        val likeSlot = slot<Document>()
-        coEvery { documentRepository.putDocument(capture(likeSlot)) } just Runs
+    describe("put document") {
+        val documentSlot = slot<Document>()
+        coEvery { documentRepository.putDocument(capture(documentSlot)) } just Runs
 
         val document: Document = mockk()
         putDocument(document)
-        likeSlot.captured shouldBe document
+        documentSlot.captured shouldBe document
 
-        coVerify(exactly = 1) { documentRepository.putDocument(capture(likeSlot)) }
+        coVerify(exactly = 1) { documentRepository.putDocument(capture(documentSlot)) }
     }
 
     afterContainer {

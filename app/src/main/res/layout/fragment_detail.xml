@@ -130,6 +130,7 @@
                     android:layout_marginTop="10dp"
                     android:text="@string/url_btn"
                     android:textAppearance="?attr/textAppearanceListItem"
+                    android:onClick="@{v -> viewModel.visit()}"
                     app:layout_constraintEnd_toEndOf="@id/guide_end"
                     app:layout_constraintTop_toBottomOf="@id/datetime" />
 

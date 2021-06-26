@@ -16,7 +16,7 @@ class DocumentViewHolder(
         binding.setClickListener { view ->
             binding.viewModel?.let { viewModel ->
                 viewModel.document.value?.let {
-                    viewModel.visit()
+                    viewModel.putDocument()
                     val activity = view.getActivity()
                     hideKeyboard(activity)
                     activity.supportFragmentManager.commit {

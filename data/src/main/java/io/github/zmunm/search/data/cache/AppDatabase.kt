@@ -8,8 +8,9 @@ import androidx.room.TypeConverters
 import io.github.zmunm.search.data.cache.converter.DateConverter
 import io.github.zmunm.search.data.cache.dao.DocumentDao
 import io.github.zmunm.search.data.cache.table.TableDocument
+import io.github.zmunm.search.data.cache.table.TableVisit
 
-@Database(entities = [TableDocument::class], version = 1, exportSchema = false)
+@Database(entities = [TableDocument::class, TableVisit::class], version = 1, exportSchema = false)
 @TypeConverters(
     DateConverter::class,
 )

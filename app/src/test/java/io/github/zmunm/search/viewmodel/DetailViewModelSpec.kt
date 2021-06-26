@@ -1,14 +1,19 @@
 package io.github.zmunm.search.viewmodel
 
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.asLiveData
 import io.github.zmunm.search.Params
 import io.github.zmunm.search.entity.Document
-import io.github.zmunm.search.usecase.GetVisitedDocument
+import io.github.zmunm.search.usecase.GetDocument
+import io.github.zmunm.search.usecase.PutVisit
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.clearMocks
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
 import io.mockk.just
@@ -19,12 +24,14 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.flowOf
 
 class DetailViewModelSpec : DescribeSpec({
-    val getVisitedDocument: GetVisitedDocument = mockk()
+    val getDocument: GetDocument = mockk()
+    val putVisit: PutVisit = mockk()
     val savedStateHandle: SavedStateHandle = mockk()
     val documentViewModel: DocumentViewModel = mockk()
 
     fun getViewModel() = DetailViewModel(
-        getVisitedDocument = getVisitedDocument,
+        getDocument = getDocument,
+        putVisit = putVisit,
         savedStateHandle = savedStateHandle,
         documentViewModel = documentViewModel,
     )
@@ -44,46 +51,57 @@ class DetailViewModelSpec : DescribeSpec({
         every { savedStateHandle.get<String>(Params.URL) } returns url
 
         var detailFlow: Flow<Document> = emptyFlow()
-        every { getVisitedDocument(url) } answers { detailFlow }
-
-        every { documentViewModel.visit() } just Runs
+        every { getDocument(url) } answers { detailFlow }
 
         it("no data") {
             detailFlow = emptyFlow()
+            every { documentViewModel.document } answers { detailFlow.asLiveData() }
 
             val viewModel = getViewModel()
+            viewModel.documentDetail.observeForever { }
 
-            viewModel.toggleLike()
+            viewModel.visit()
         }
 
         it("has data") {
-            val document: Document = mockk()
+            val document: Document = mockk {
+                val doc = this
+                every { doc.url } returns "url"
+            }
             detailFlow = flowOf(document)
+            every { documentViewModel.document } returns MutableLiveData(document)
 
             every { documentViewModel.bindDocument(document) } just Runs
 
             val viewModel = getViewModel()
+            viewModel.documentDetail.observeForever { }
 
             verify { documentViewModel.bindDocument(document) }
 
-            viewModel.toggleLike()
+            coEvery { putVisit(url) } just Runs
+
+            viewModel.visit()
+
+            coVerify { putVisit(url) }
         }
 
         verify {
             savedStateHandle.get<String>(Params.URL)
-            getVisitedDocument(url)
-            documentViewModel.visit()
+            getDocument(url)
+            documentViewModel.document
         }
     }
 
     afterContainer {
         confirmVerified(
-            getVisitedDocument,
+            getDocument,
+            putVisit,
             savedStateHandle,
             documentViewModel,
         )
         clearMocks(
-            getVisitedDocument,
+            getDocument,
+            putVisit,
             savedStateHandle,
             documentViewModel,
         )

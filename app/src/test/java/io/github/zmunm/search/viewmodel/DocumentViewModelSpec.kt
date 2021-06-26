@@ -1,7 +1,8 @@
 package io.github.zmunm.search.viewmodel
 
 import io.github.zmunm.search.entity.Document
-import io.github.zmunm.search.usecase.GetVisitedDocument
+import io.github.zmunm.search.entity.Visit
+import io.github.zmunm.search.usecase.GetVisit
 import io.github.zmunm.search.usecase.PutDocument
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldNotBe
@@ -21,12 +22,12 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestCoroutineDispatcher
 
 class DocumentViewModelSpec : DescribeSpec({
-    val getVisitedDocument: GetVisitedDocument = mockk()
+    val getVisit: GetVisit = mockk()
     val putDocument: PutDocument = mockk()
     val testDispatcher = TestCoroutineDispatcher()
 
     val viewModel = DocumentViewModel(
-        getVisitedDocument = getVisitedDocument,
+        getVisit = getVisit,
         putDocument = putDocument,
         dispatcher = testDispatcher,
     )
@@ -35,8 +36,8 @@ class DocumentViewModelSpec : DescribeSpec({
     viewModel.visit.observeForever { }
 
     describe("no bind") {
-        it("visit") {
-            viewModel.visit()
+        it("click") {
+            viewModel.putDocument()
         }
     }
 
@@ -46,9 +47,9 @@ class DocumentViewModelSpec : DescribeSpec({
             every { url } returns givenUrl
         }
 
-        var visitFlow: Flow<Document> = emptyFlow()
+        var visitFlow: Flow<Visit> = emptyFlow()
         every {
-            getVisitedDocument(givenUrl)
+            getVisit(givenUrl)
         } answers {
             visitFlow
         }
@@ -57,30 +58,28 @@ class DocumentViewModelSpec : DescribeSpec({
 
         coEvery { putDocument(capture(visitedDocument)) } just Runs
 
-        it("did like") {
-            visitFlow = flowOf(mockk())
+        visitFlow = flowOf(mockk())
 
-            viewModel.bindDocument(document)
-            viewModel.visit.value shouldNotBe null
+        viewModel.bindDocument(document)
+        viewModel.visit.value shouldNotBe null
 
-            viewModel.visit()
-            visitedDocument.captured shouldNotBe null
-        }
+        viewModel.putDocument()
+        visitedDocument.captured shouldNotBe null
 
         coVerify { putDocument(capture(visitedDocument)) }
 
         verify {
-            getVisitedDocument(givenUrl)
+            getVisit(givenUrl)
         }
     }
 
     afterContainer {
         confirmVerified(
-            getVisitedDocument,
+            getVisit,
             putDocument,
         )
         clearMocks(
-            getVisitedDocument,
+            getVisit,
             putDocument,
         )
     }

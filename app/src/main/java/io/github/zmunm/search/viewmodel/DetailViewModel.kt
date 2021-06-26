@@ -7,20 +7,22 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zmunm.search.Params
 import io.github.zmunm.search.entity.Document
-import io.github.zmunm.search.usecase.GetVisitedDocument
+import io.github.zmunm.search.usecase.GetDocument
+import io.github.zmunm.search.usecase.PutVisit
 import javax.inject.Inject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class DetailViewModel @Inject constructor(
-    getVisitedDocument: GetVisitedDocument,
+    getDocument: GetDocument,
+    private val putVisit: PutVisit,
     savedStateHandle: SavedStateHandle,
     private val documentViewModel: DocumentViewModel,
 ) : ViewModel() {
     val documentDetail: LiveData<Document> get() = documentViewModel.document
 
-    private val detailFlow = getVisitedDocument(
+    private val detailFlow = getDocument(
         savedStateHandle.get<String>(Params.URL) ?: error(Params.URL)
     )
 
@@ -32,7 +34,11 @@ class DetailViewModel @Inject constructor(
         }
     }
 
-    fun toggleLike() {
-        documentViewModel.visit()
+    fun visit() {
+        documentDetail.value?.url?.let {
+            viewModelScope.launch {
+                putVisit(it)
+            }
+        }
     }
 }

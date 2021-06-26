@@ -8,9 +8,9 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 
-internal class GetVisitedDocumentSpec : DescribeSpec({
+internal class GetDocumentSpec : DescribeSpec({
     val documentRepository: DocumentRepository = mockk()
-    val getVisitedDocument = GetVisitedDocument(
+    val getDocument = GetDocument(
         documentRepository = documentRepository
     )
 
@@ -20,7 +20,7 @@ internal class GetVisitedDocumentSpec : DescribeSpec({
             documentRepository.getDocument(url)
         } returns mockk()
 
-        getVisitedDocument(url)
+        getDocument(url)
 
         coVerify(exactly = 1) {
             documentRepository.getDocument(url)
