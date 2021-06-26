@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.zmunm.search.Params
+import io.github.zmunm.search.SingleLiveEvent
 import io.github.zmunm.search.entity.Document
 import io.github.zmunm.search.usecase.GetDocument
 import io.github.zmunm.search.usecase.PutVisit
@@ -26,6 +27,9 @@ class DetailViewModel @Inject constructor(
         savedStateHandle.get<String>(Params.URL) ?: error(Params.URL)
     )
 
+    private val _urlFlow = SingleLiveEvent<Action>()
+    val urlFlow: LiveData<Action?> get() = _urlFlow
+
     init {
         viewModelScope.launch {
             detailFlow.collectLatest {
@@ -35,10 +39,15 @@ class DetailViewModel @Inject constructor(
     }
 
     fun visit() {
-        documentDetail.value?.url?.let {
+        documentDetail.value?.let {
             viewModelScope.launch {
-                putVisit(it)
+                putVisit(it.url)
+                _urlFlow.value = Action.Visit(it)
             }
         }
+    }
+
+    sealed class Action {
+        data class Visit(val document: Document) : Action()
     }
 }

@@ -1,4 +1,4 @@
-package io.github.zmunm.search.ui
+package io.github.zmunm.search.ui.activity
 
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.zmunm.search.R
