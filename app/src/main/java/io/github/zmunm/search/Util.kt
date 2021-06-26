@@ -7,11 +7,6 @@ import android.content.ContextWrapper
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 fun View.getActivity(): AppCompatActivity = context.getActivity()
 
@@ -24,21 +19,6 @@ fun Context.getActivity(): AppCompatActivity {
         contextTemp = contextTemp.baseContext
     }
     throw ActivityNotFoundException()
-}
-
-fun <T> debounce(
-    delayMs: Long = 500L,
-    coroutineContext: CoroutineContext,
-    block: (T) -> Unit,
-): (T) -> Unit {
-    var debounceJob: Job? = null
-    return { param: T ->
-        debounceJob?.cancel()
-        debounceJob = CoroutineScope(coroutineContext).launch {
-            delay(delayMs)
-            block(param)
-        }
-    }
 }
 
 fun hideKeyboard(activity: Activity) {

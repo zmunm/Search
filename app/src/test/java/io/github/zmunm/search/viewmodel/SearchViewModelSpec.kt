@@ -12,16 +12,13 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.TestCoroutineDispatcher
 
 class SearchViewModelSpec : DescribeSpec({
 
     val searchPagingSource: SearchPagingSourceFactory = mockk()
-    val testDispatcher = TestCoroutineDispatcher()
 
     val viewModel = SearchViewModel(
         searchPagingSource = searchPagingSource,
-        dispatcher = testDispatcher,
     )
 
     viewModel.pager.observeForever {}
@@ -36,20 +33,11 @@ class SearchViewModelSpec : DescribeSpec({
         } returns flowOf(pagingData)
 
         it("single query") {
-            viewModel.onQueryChange("query1")
+            viewModel.query.value = "query1"
 
-            testDispatcher.advanceUntilIdle()
+            viewModel.search()
 
             querySlot.captured shouldBe "query1"
-        }
-
-        it("double query") {
-            viewModel.onQueryChange("query1")
-            viewModel.onQueryChange("query2")
-
-            testDispatcher.advanceUntilIdle()
-
-            querySlot.captured shouldBe "query2"
         }
 
         verify {
@@ -57,29 +45,12 @@ class SearchViewModelSpec : DescribeSpec({
         }
     }
 
-    describe("skip search") {
-        it("empty") {
-            viewModel.onQueryChange("")
-        }
-
-        it("blank") {
-            viewModel.onQueryChange(" ")
-        }
-
-        it("end with empty") {
-            viewModel.onQueryChange("query1")
-            viewModel.onQueryChange("")
-        }
-    }
-
     afterContainer {
-        testDispatcher.advanceUntilIdle()
         confirmVerified(
             searchPagingSource,
         )
         clearMocks(
             searchPagingSource,
         )
-        testDispatcher.cleanupTestCoroutines()
     }
 })
