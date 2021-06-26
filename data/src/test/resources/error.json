@@ -1,0 +1,4 @@
+{
+  "errorType": "AccessDeniedError",
+  "message": "cannot find Authorization : KakaoAK header"
+}

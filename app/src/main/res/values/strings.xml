@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Search</string>
+    <string name="price_format" formatted="false">%,d원</string>
+    <string name="today">오늘</string>
+    <string name="yesterday">어제</string>
+    <string name="date_format" formatted="false">%1$tY년 %1$tm월 %1$td일</string>
+    <string name="search_hint">책 이름을 입력하세요</string>
+    <string name="url_btn">페이지 열기</string>
+</resources>
