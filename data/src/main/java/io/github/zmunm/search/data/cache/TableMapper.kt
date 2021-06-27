@@ -1,8 +1,10 @@
 package io.github.zmunm.search.data.cache
 
 import io.github.zmunm.search.data.cache.table.TableDocument
+import io.github.zmunm.search.data.cache.table.TableRecent
 import io.github.zmunm.search.data.cache.table.TableVisit
 import io.github.zmunm.search.entity.Document
+import io.github.zmunm.search.entity.Recent
 import io.github.zmunm.search.entity.Visit
 
 internal fun Document.toTable(): TableDocument = TableDocument(
@@ -27,5 +29,10 @@ internal fun TableDocument.toEntity(): Document = Document(
 
 internal fun TableVisit.toEntity(): Visit = Visit(
     url = url,
+    datetime = datetime,
+)
+
+internal fun TableRecent.toEntity(): Recent = Recent(
+    query = query,
     datetime = datetime,
 )

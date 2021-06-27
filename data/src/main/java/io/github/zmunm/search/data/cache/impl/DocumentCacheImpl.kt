@@ -2,10 +2,12 @@ package io.github.zmunm.search.data.cache.impl
 
 import io.github.zmunm.search.data.cache.DocumentCache
 import io.github.zmunm.search.data.cache.dao.DocumentDao
+import io.github.zmunm.search.data.cache.table.TableRecent
 import io.github.zmunm.search.data.cache.table.TableVisit
 import io.github.zmunm.search.data.cache.toEntity
 import io.github.zmunm.search.data.cache.toTable
 import io.github.zmunm.search.entity.Document
+import io.github.zmunm.search.entity.Recent
 import io.github.zmunm.search.entity.Visit
 import java.util.Date
 import kotlinx.coroutines.flow.Flow
@@ -26,11 +28,24 @@ internal class DocumentCacheImpl(
     }
 
     override fun getVisit(url: String): Flow<Visit> = documentDao.getVisit(url)
-        .filterNotNull().map {
+        .filterNotNull()
+        .map {
             it.toEntity()
         }
 
     override suspend fun insertVisit(url: String) {
         documentDao.insertVisit(TableVisit(url, Date()))
+    }
+
+    override fun getRecent(): Flow<List<Recent>> = documentDao.getRecent()
+        .filterNotNull()
+        .map { list ->
+            list.map {
+                it.toEntity()
+            }
+        }
+
+    override suspend fun insertRecent(query: String) {
+        documentDao.insertRecent(TableRecent(query, Date()))
     }
 }

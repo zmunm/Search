@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import io.github.zmunm.search.data.cache.table.TableDocument
+import io.github.zmunm.search.data.cache.table.TableRecent
 import io.github.zmunm.search.data.cache.table.TableVisit
 import kotlinx.coroutines.flow.Flow
 
@@ -18,4 +19,10 @@ internal abstract class DocumentDao : BaseDao<TableDocument>() {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertVisit(visit: TableVisit)
+
+    @Query("SELECT * FROM recent ORDER BY datetime DESC")
+    abstract fun getRecent(): Flow<List<TableRecent>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract suspend fun insertRecent(recent: TableRecent)
 }

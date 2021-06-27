@@ -5,11 +5,13 @@ import io.github.zmunm.search.entity.DocumentType
 import io.github.zmunm.search.repository.DocumentRepository
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
+import io.mockk.Runs
 import io.mockk.clearMocks
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
 
 internal class GetDocumentListSpec : DescribeSpec({
@@ -30,6 +32,8 @@ internal class GetDocumentListSpec : DescribeSpec({
             false
         )
 
+        coEvery { documentRepository.putRecent(query) } just Runs
+
         coEvery {
             documentRepository.getBlogs(query, null, captureNullable(pageSlot), null)
         } returns documentList
@@ -40,6 +44,7 @@ internal class GetDocumentListSpec : DescribeSpec({
         }
 
         coVerify(exactly = 1) {
+            documentRepository.putRecent(query)
             documentRepository.getBlogs(query, null, captureNullable(pageSlot), null)
         }
     }

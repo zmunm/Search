@@ -8,10 +8,13 @@ import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
 import android.text.style.URLSpan
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
 import androidx.databinding.BindingAdapter
+import androidx.databinding.InverseBindingAdapter
+import androidx.databinding.InverseBindingListener
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -107,3 +110,19 @@ fun TextView.dateString(date: Date?) {
 }
 
 private const val ONE_DAY: Long = 1000 * 60 * 60 * 24
+
+@BindingAdapter("hasFocus")
+fun EditText.setFocusChanged(hasFocus: Boolean) {
+    if (hasFocus) requestFocus()
+    else clearFocus()
+}
+
+@InverseBindingAdapter(attribute = "hasFocus", event = "focusChanged")
+fun EditText.getFocusChanged(): Boolean = hasFocus()
+
+@BindingAdapter("focusChanged")
+fun EditText.setFocusChangedListener(listener: InverseBindingListener) {
+    setOnFocusChangeListener { v, hasFocus ->
+        listener.onChange()
+    }
+}

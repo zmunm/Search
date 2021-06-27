@@ -14,31 +14,34 @@ class GetDocumentList @Inject constructor(
         sort: String? = ACCURACY,
         page: Int?,
         size: Int?,
-    ): DocumentList = when (type) {
-        DocumentType.ALL -> {
-            val cafes =
+    ): DocumentList {
+        documentRepository.putRecent(query)
+        return when (type) {
+            DocumentType.ALL -> {
+                val cafes =
+                    documentRepository.getBlogs(
+                        query = query,
+                        sort = sort,
+                        page = page,
+                        size = size,
+                    )
+                cafes.copy(documentList = cafes.documentList.sortedBy { it.title })
+            }
+            DocumentType.BLOG ->
                 documentRepository.getBlogs(
                     query = query,
                     sort = sort,
                     page = page,
                     size = size,
                 )
-            cafes.copy(documentList = cafes.documentList.sortedBy { it.title })
+            DocumentType.CAFE ->
+                documentRepository.getCafes(
+                    query = query,
+                    sort = sort,
+                    page = page,
+                    size = size,
+                )
         }
-        DocumentType.BLOG ->
-            documentRepository.getBlogs(
-                query = query,
-                sort = sort,
-                page = page,
-                size = size,
-            )
-        DocumentType.CAFE ->
-            documentRepository.getCafes(
-                query = query,
-                sort = sort,
-                page = page,
-                size = size,
-            )
     }
 
     companion object {
