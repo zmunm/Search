@@ -5,9 +5,12 @@ import android.view.View
 import android.view.inputmethod.EditorInfo
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.PagingData
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.zmunm.search.R
 import io.github.zmunm.search.databinding.FragmentSearchBinding
+import io.github.zmunm.search.entity.SortType
 import io.github.zmunm.search.hideKeyboard
 import io.github.zmunm.search.ui.adapter.RecentAdapter
 import io.github.zmunm.search.ui.adapter.SearchAdapter
@@ -37,6 +40,7 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         viewModel.pager.observe(viewLifecycleOwner) { data ->
             hideKeyboard(requireActivity())
             lifecycleScope.launch {
+                adapter.submitData(PagingData.empty())
                 adapter.submitData(data)
             }
         }
@@ -51,5 +55,31 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
                 true
             } else false
         }
+
+        viewModel.action.observe(viewLifecycleOwner) { action ->
+            when (action) {
+                is SearchViewModel.Action.Sort -> {
+                    sortDialog(action)
+                }
+            }
+        }
+    }
+
+    private fun sortDialog(sortAction: SearchViewModel.Action.Sort) {
+        var sort = sortAction.default
+        val list = SortType.values()
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.sort_title)
+            .setSingleChoiceItems(
+                list.map { it.name }.toTypedArray(),
+                list.indexOf(sort)
+            ) { _, which ->
+                sort = list[which]
+            }
+            .setPositiveButton(R.string.sort_cancel, null)
+            .setNegativeButton(R.string.sort_ok) { _, which ->
+                sortAction.callBack(sort)
+            }
+            .show()
     }
 }

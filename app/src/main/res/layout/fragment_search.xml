@@ -54,11 +54,39 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-                <View
+                <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="20dp"
-                    android:background="?attr/colorPrimary"
-                    app:layout_scrollFlags="scroll|exitUntilCollapsed" />
+                    android:layout_height="wrap_content"
+                    android:background="?attr/colorOnPrimary"
+                    app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/type"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                        android:text="@{viewModel.documentType.name()}"
+                        android:onClick="@{v -> viewModel.changeFilter()}"
+                        app:backgroundTint="?attr/colorPrimary"
+                        app:layout_constraintEnd_toStartOf="@id/sort"
+                        app:layout_constraintHorizontal_weight="0.7"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/sort"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+                        android:text="@{viewModel.sort.name()}"
+                        android:onClick="@{v -> viewModel.changeSort()}"
+                        app:backgroundTint="?attr/colorSecondary"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintHorizontal_weight="0.3"
+                        app:layout_constraintStart_toEndOf="@id/type"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
 
             </com.google.android.material.appbar.AppBarLayout>
 
@@ -96,7 +124,8 @@
             app:layout_constraintEnd_toEndOf="@id/search"
             app:layout_constraintStart_toStartOf="@id/search"
             app:layout_constraintTop_toBottomOf="@id/search"
-            tools:listitem="@layout/list_query" />
+            tools:listitem="@layout/list_query"
+            tools:visibility="gone" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

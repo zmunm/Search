@@ -27,8 +27,8 @@ class DetailViewModel @Inject constructor(
         savedStateHandle.get<String>(Params.URL) ?: error(Params.URL)
     )
 
-    private val _urlFlow = SingleLiveEvent<Action>()
-    val urlFlow: LiveData<Action?> get() = _urlFlow
+    private val _action = SingleLiveEvent<Action>()
+    val action: LiveData<Action> get() = _action
 
     init {
         viewModelScope.launch {
@@ -42,7 +42,7 @@ class DetailViewModel @Inject constructor(
         documentDetail.value?.let {
             viewModelScope.launch {
                 putVisit(it.url)
-                _urlFlow.value = Action.Visit(it)
+                _action.setValue(Action.Visit(it))
             }
         }
     }

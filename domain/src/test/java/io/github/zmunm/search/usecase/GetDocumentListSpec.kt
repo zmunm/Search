@@ -2,7 +2,9 @@ package io.github.zmunm.search.usecase
 
 import io.github.zmunm.search.entity.DocumentList
 import io.github.zmunm.search.entity.DocumentType
+import io.github.zmunm.search.entity.SortType
 import io.github.zmunm.search.repository.DocumentRepository
+import io.github.zmunm.search.usecase.GetDocumentList.Companion.PAGE_SIZE
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
 import io.mockk.Runs
@@ -35,17 +37,17 @@ internal class GetDocumentListSpec : DescribeSpec({
         coEvery { documentRepository.putRecent(query) } just Runs
 
         coEvery {
-            documentRepository.getBlogs(query, null, captureNullable(pageSlot), null)
+            documentRepository.getBlogs(query, null, captureNullable(pageSlot), PAGE_SIZE)
         } returns documentList
 
         it("page null") {
-            getDocumentList(DocumentType.ALL, query, null, null, null)
+            getDocumentList(DocumentType.BLOG, SortType.TITLE, query, null, null)
             pageSlot.single() shouldBe null
         }
 
         coVerify(exactly = 1) {
             documentRepository.putRecent(query)
-            documentRepository.getBlogs(query, null, captureNullable(pageSlot), null)
+            documentRepository.getBlogs(query, null, captureNullable(pageSlot), PAGE_SIZE)
         }
     }
 

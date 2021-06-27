@@ -6,5 +6,10 @@
     <string name="date_format" formatted="false">%1$tY년 %1$tm월 %1$td일</string>
     <string name="search_hint">검색어를 입력하세요</string>
     <string name="search_btn">검색</string>
+
+    <string name="sort_title">정렬</string>
+    <string name="sort_ok">확인</string>
+    <string name="sort_cancel">취소</string>
+
     <string name="url_btn">페이지 열기</string>
 </resources>

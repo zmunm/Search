@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import io.github.zmunm.search.entity.Document
 import io.github.zmunm.search.entity.DocumentList
 import io.github.zmunm.search.entity.DocumentType
+import io.github.zmunm.search.entity.SortType
 import io.github.zmunm.search.usecase.GetDocumentList
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.shouldBe
@@ -13,13 +14,15 @@ import io.mockk.coVerify
 import io.mockk.confirmVerified
 import io.mockk.mockk
 
-private const val PAGE_SIZE = 25
-
 class SearchPagingSourceSpec : DescribeSpec({
-    val query = "query"
+    val option = SearchPagingSource.Option(
+        query = "query",
+        DocumentType.ALL,
+        SortType.TITLE,
+    )
     val getDocumentList: GetDocumentList = mockk()
 
-    val source = SearchPagingSource(query, getDocumentList)
+    val source = SearchPagingSource(option, getDocumentList)
 
     describe("paging") {
         var isEnd = false
@@ -28,10 +31,10 @@ class SearchPagingSourceSpec : DescribeSpec({
 
         coEvery {
             getDocumentList(
-                type = DocumentType.ALL,
-                query = query,
+                documentType = option.documentType,
+                sortType = option.sortType,
+                query = option.query,
                 page = captureNullable(pageSlot),
-                size = PAGE_SIZE
             )
         } answers {
             DocumentList(documents, isEnd)
@@ -90,10 +93,10 @@ class SearchPagingSourceSpec : DescribeSpec({
 
         coVerify {
             getDocumentList(
-                type = DocumentType.ALL,
-                query = query,
+                documentType = option.documentType,
+                sortType = option.sortType,
+                query = option.query,
                 page = captureNullable(pageSlot),
-                size = PAGE_SIZE
             )
         }
     }

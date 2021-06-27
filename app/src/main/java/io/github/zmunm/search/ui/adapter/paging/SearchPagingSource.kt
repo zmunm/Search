@@ -11,11 +11,13 @@ import dagger.assisted.AssistedInject
 import io.github.zmunm.search.entity.Document
 import io.github.zmunm.search.entity.DocumentList
 import io.github.zmunm.search.entity.DocumentType
+import io.github.zmunm.search.entity.SortType
 import io.github.zmunm.search.usecase.GetDocumentList
+import io.github.zmunm.search.usecase.GetDocumentList.Companion.PAGE_SIZE
 import kotlinx.coroutines.flow.Flow
 
 class SearchPagingSource @AssistedInject constructor(
-    @Assisted private val query: String,
+    @Assisted private val option: Option,
     private val getDocumentList: GetDocumentList,
 ) : PagingSource<Int, Document>() {
 
@@ -24,10 +26,10 @@ class SearchPagingSource @AssistedInject constructor(
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Document> {
         val page = params.key ?: 1
         return getDocumentList(
-            type = DocumentType.ALL,
-            query = query,
+            documentType = option.documentType,
+            sortType = option.sortType,
+            query = option.query,
             page = page,
-            size = PAGE_SIZE
         ).toPage(page)
     }
 
@@ -42,12 +44,14 @@ class SearchPagingSource @AssistedInject constructor(
 
     fun getPager(): Flow<PagingData<Document>> = Pager(pagingConfig) { this }.flow
 
-    companion object {
-        private const val PAGE_SIZE = 25
-    }
+    data class Option(
+        val query: String,
+        val documentType: DocumentType,
+        val sortType: SortType,
+    )
 }
 
 @AssistedFactory
 interface SearchPagingSourceFactory {
-    fun create(query: String): SearchPagingSource
+    fun create(option: SearchPagingSource.Option): SearchPagingSource
 }

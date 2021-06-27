@@ -42,7 +42,7 @@ class DetailFragment : BaseFragment<FragmentDetailBinding>() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding.viewModel = viewModel
-        viewModel.urlFlow.observe(viewLifecycleOwner) { action ->
+        viewModel.action.observe(viewLifecycleOwner) { action ->
             when (action) {
                 is DetailViewModel.Action.Visit -> {
                     requireContext().startActivity(

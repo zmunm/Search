@@ -9,8 +9,12 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.zmunm.search.SingleLiveEvent
 import io.github.zmunm.search.entity.Document
+import io.github.zmunm.search.entity.DocumentType
 import io.github.zmunm.search.entity.Recent
+import io.github.zmunm.search.entity.SortType
+import io.github.zmunm.search.ui.adapter.paging.SearchPagingSource
 import io.github.zmunm.search.ui.adapter.paging.SearchPagingSourceFactory
 import io.github.zmunm.search.usecase.GetRecentQuery
 import javax.inject.Inject
@@ -24,18 +28,27 @@ class SearchViewModel @Inject constructor(
 
     val hasFocus = MutableLiveData<Boolean>()
 
-    private val _pager = MutableLiveData<String>()
-    val pager: LiveData<PagingData<Document>> = _pager.switchMap { query ->
-        getPager(query)
+    private val defaultDocumentType = DocumentType.CAFE
+    private val _documentType = MutableLiveData(defaultDocumentType)
+    val documentType: LiveData<DocumentType> get() = _documentType
+
+    private val defaultSort = SortType.TITLE
+    private val _sort = MutableLiveData(defaultSort)
+    val sort: LiveData<SortType> get() = _sort
+
+    private val _pager = MutableLiveData<SearchPagingSource.Option>()
+    val pager: LiveData<PagingData<Document>> = _pager.switchMap { option ->
+        getPager(option)
     }
 
     val recentQuery: LiveData<List<Recent>> = getRecentQuery().asLiveData()
 
+    private val _action = SingleLiveEvent<Action>()
+    val action: LiveData<Action> get() = _action
+
     fun search() {
         hasFocus.value = false
-        query.value?.let {
-            _pager.value = it
-        }
+        refreshPager()
     }
 
     fun searchRecent(query: String) {
@@ -43,9 +56,41 @@ class SearchViewModel @Inject constructor(
         search()
     }
 
-    private fun getPager(query: String): LiveData<PagingData<Document>> =
-        searchPagingSource.create(query)
+    fun changeFilter() {
+        TODO()
+    }
+
+    fun changeSort() {
+        sort.value?.let {
+            _action.setValue(Action.Sort(it) { result ->
+                _sort.value = result
+                refreshPager()
+            })
+        }
+    }
+
+    private fun refreshPager() {
+        _pager.value = SearchPagingSource.Option(
+            query.value ?: "",
+            documentType.value ?: defaultDocumentType,
+            sort.value ?: defaultSort
+        )
+    }
+
+    private fun getPager(option: SearchPagingSource.Option): LiveData<PagingData<Document>> =
+        searchPagingSource.create(option)
             .getPager()
             .cachedIn(viewModelScope)
             .asLiveData()
+
+    sealed class Action {
+        data class DocumentFilter(
+            val default: DocumentType,
+            val callBack: (DocumentType) -> Unit,
+        ) : Action()
+        data class Sort(
+            val default: SortType,
+            val callBack: (SortType) -> Unit,
+        ) : Action()
+    }
 }

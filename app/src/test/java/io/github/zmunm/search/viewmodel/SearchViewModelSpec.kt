@@ -2,6 +2,7 @@ package io.github.zmunm.search.viewmodel
 
 import androidx.paging.PagingData
 import io.github.zmunm.search.entity.Document
+import io.github.zmunm.search.ui.adapter.paging.SearchPagingSource
 import io.github.zmunm.search.ui.adapter.paging.SearchPagingSourceFactory
 import io.github.zmunm.search.usecase.GetRecentQuery
 import io.kotest.core.spec.style.DescribeSpec
@@ -28,10 +29,10 @@ class SearchViewModelSpec : DescribeSpec({
     val pagingData: PagingData<Document> = PagingData.from(listOf(mockk()))
 
     describe("search query") {
-        val querySlot = slot<String>()
+        val optionSlot = slot<SearchPagingSource.Option>()
 
         every {
-            searchPagingSource.create(capture(querySlot)).getPager()
+            searchPagingSource.create(capture(optionSlot)).getPager()
         } returns flowOf(pagingData)
 
         every { getRecentQuery() } returns emptyFlow()
@@ -46,11 +47,11 @@ class SearchViewModelSpec : DescribeSpec({
 
             viewModel.search()
 
-            querySlot.captured shouldBe "query1"
+            optionSlot.captured.query shouldBe "query1"
         }
 
         verify {
-            searchPagingSource.create(capture(querySlot)).getPager()
+            searchPagingSource.create(capture(optionSlot)).getPager()
             getRecentQuery()
         }
     }
