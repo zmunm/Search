@@ -28,7 +28,7 @@ class SearchViewModel @Inject constructor(
 
     val hasFocus = MutableLiveData<Boolean>()
 
-    private val defaultDocumentType = DocumentType.CAFE
+    private val defaultDocumentType = DocumentType.ALL
     private val _documentType = MutableLiveData(defaultDocumentType)
     val documentType: LiveData<DocumentType> get() = _documentType
 
@@ -57,7 +57,12 @@ class SearchViewModel @Inject constructor(
     }
 
     fun changeFilter() {
-        TODO()
+        documentType.value?.let {
+            _action.setValue(Action.DocumentFilter(it) { result ->
+                _documentType.value = result
+                refreshPager()
+            })
+        }
     }
 
     fun changeSort() {

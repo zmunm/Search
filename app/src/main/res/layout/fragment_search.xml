@@ -5,6 +5,8 @@
 
     <data>
 
+        <import type="io.github.zmunm.search.entity.DocumentType" />
+
         <variable
             name="viewModel"
             type="io.github.zmunm.search.viewmodel.SearchViewModel" />
@@ -64,9 +66,9 @@
                         android:id="@+id/type"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                        android:text="@{viewModel.documentType.name()}"
                         android:onClick="@{v -> viewModel.changeFilter()}"
+                        android:text="@{viewModel.documentType.name()}"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                         app:backgroundTint="?attr/colorPrimary"
                         app:layout_constraintEnd_toStartOf="@id/sort"
                         app:layout_constraintHorizontal_weight="0.7"
@@ -77,9 +79,9 @@
                         android:id="@+id/sort"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-                        android:text="@{viewModel.sort.name()}"
                         android:onClick="@{v -> viewModel.changeSort()}"
+                        android:text="@{viewModel.sort.name()}"
+                        android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
                         app:backgroundTint="?attr/colorSecondary"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintHorizontal_weight="0.3"

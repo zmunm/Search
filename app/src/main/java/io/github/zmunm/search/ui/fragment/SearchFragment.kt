@@ -3,15 +3,17 @@ package io.github.zmunm.search.ui.fragment
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
+import androidx.appcompat.widget.ListPopupWindow
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.paging.PagingData
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.zmunm.search.R
 import io.github.zmunm.search.databinding.FragmentSearchBinding
+import io.github.zmunm.search.entity.DocumentType
 import io.github.zmunm.search.entity.SortType
 import io.github.zmunm.search.hideKeyboard
+import io.github.zmunm.search.ui.adapter.FilterListAdapter
 import io.github.zmunm.search.ui.adapter.RecentAdapter
 import io.github.zmunm.search.ui.adapter.SearchAdapter
 import io.github.zmunm.search.ui.base.BaseFragment
@@ -40,7 +42,6 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
         viewModel.pager.observe(viewLifecycleOwner) { data ->
             hideKeyboard(requireActivity())
             lifecycleScope.launch {
-                adapter.submitData(PagingData.empty())
                 adapter.submitData(data)
             }
         }
@@ -58,14 +59,28 @@ class SearchFragment : BaseFragment<FragmentSearchBinding>() {
 
         viewModel.action.observe(viewLifecycleOwner) { action ->
             when (action) {
-                is SearchViewModel.Action.Sort -> {
-                    sortDialog(action)
-                }
+                is SearchViewModel.Action.DocumentFilter ->
+                    showFilterListPopup(binding.type, action)
+                is SearchViewModel.Action.Sort ->
+                    showSortDialog(action)
             }
         }
     }
 
-    private fun sortDialog(sortAction: SearchViewModel.Action.Sort) {
+    private fun showFilterListPopup(
+        anchorView: View,
+        action: SearchViewModel.Action.DocumentFilter
+    ) {
+        val popup = ListPopupWindow(requireContext())
+        popup.setAdapter(FilterListAdapter(DocumentType.values().toList()) {
+            action.callBack(it)
+            popup.dismiss()
+        })
+        popup.anchorView = anchorView
+        popup.show()
+    }
+
+    private fun showSortDialog(sortAction: SearchViewModel.Action.Sort) {
         var sort = sortAction.default
         val list = SortType.values()
         MaterialAlertDialogBuilder(requireContext())
