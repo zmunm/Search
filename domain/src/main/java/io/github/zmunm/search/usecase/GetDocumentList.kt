@@ -19,6 +19,7 @@ class GetDocumentList @Inject constructor(
         if (query.isNotBlank()) {
             documentRepository.putRecent(query)
         }
+
         val list = when (documentType) {
             DocumentType.ALL -> {
                 val blogs = documentRepository.getBlogs(
@@ -34,10 +35,7 @@ class GetDocumentList @Inject constructor(
                     size = PAGE_SIZE,
                 )
 
-                DocumentList(
-                    blogs.documentList + cafes.documentList,
-                    blogs.isEnd && cafes.isEnd
-                )
+                blogs + cafes
             }
             DocumentType.BLOG ->
                 documentRepository.getBlogs(

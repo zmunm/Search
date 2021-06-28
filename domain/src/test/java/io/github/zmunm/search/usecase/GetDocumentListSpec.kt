@@ -31,7 +31,7 @@ internal class GetDocumentListSpec : DescribeSpec({
                     every { title } returns "title"
                 }
             ),
-            false
+            DocumentType.ALL
         )
 
         coEvery { documentRepository.putRecent(query) } just Runs

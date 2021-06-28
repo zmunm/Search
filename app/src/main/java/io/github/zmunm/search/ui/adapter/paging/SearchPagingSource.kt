@@ -9,7 +9,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import io.github.zmunm.search.entity.Document
-import io.github.zmunm.search.entity.DocumentList
 import io.github.zmunm.search.entity.DocumentType
 import io.github.zmunm.search.entity.SortType
 import io.github.zmunm.search.usecase.GetDocumentList
@@ -19,30 +18,82 @@ import kotlinx.coroutines.flow.Flow
 class SearchPagingSource @AssistedInject constructor(
     @Assisted private val option: Option,
     private val getDocumentList: GetDocumentList,
-) : PagingSource<Int, Document>() {
+) : PagingSource<SearchPagingSource.PagingParam, Document>() {
 
     private val pagingConfig = PagingConfig(pageSize = PAGE_SIZE)
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Document> {
-        val page = params.key ?: 1
-        return getDocumentList(
-            documentType = option.documentType,
+    override suspend fun load(
+        params: LoadParams<PagingParam>
+    ): LoadResult<PagingParam, Document> {
+        val page = params.key ?: when (option.documentType) {
+            DocumentType.ALL -> PagingParam(1, false, 1, false)
+            DocumentType.BLOG -> PagingParam(1, false, 0, true)
+            DocumentType.CAFE -> PagingParam(0, true, 1, false)
+        }
+
+        val list = getDocumentList(
+            documentType = page.getDocumentType(),
             sortType = option.sortType,
             query = option.query,
-            page = page,
-        ).toPage(page)
+            page = page.getPage(),
+        )
+        return LoadResult.Page(
+            data = list.documentList,
+            prevKey = page.prevPage(),
+            nextKey = page.nextPage(list.hasNext)
+        )
     }
 
-    override fun getRefreshKey(state: PagingState<Int, Document>): Int? =
-        state.anchorPosition
-
-    private fun DocumentList.toPage(now: Int) = LoadResult.Page(
-        data = documentList,
-        prevKey = if (now == 1) null else now - 1,
-        nextKey = if (isEnd) null else now + 1
-    )
+    override fun getRefreshKey(state: PagingState<PagingParam, Document>): PagingParam? =
+        state.anchorPosition?.let {
+            state.closestPageToPosition(it)
+        }?.let {
+            it.prevKey ?: it.nextKey
+        }
 
     fun getPager(): Flow<PagingData<Document>> = Pager(pagingConfig) { this }.flow
+
+    data class PagingParam(
+        val blogKey: Int,
+        val blogEnd: Boolean,
+        val cafeKey: Int,
+        val cafeEnd: Boolean,
+    ) {
+        fun getDocumentType(): DocumentType = when {
+            !blogEnd && cafeEnd -> DocumentType.BLOG
+            blogEnd && !cafeEnd -> DocumentType.CAFE
+            else -> DocumentType.ALL
+        }
+
+        fun getPage(): Int = maxOf(blogKey, cafeKey)
+
+        fun nextPage(documentType: DocumentType?): PagingParam? = when (documentType) {
+            DocumentType.ALL -> copy(
+                blogKey = if (blogEnd) blogKey else blogKey + 1,
+                cafeKey = if (cafeEnd) cafeKey else cafeKey + 1,
+            )
+            DocumentType.BLOG -> copy(
+                blogKey = blogKey + 1,
+                cafeEnd = true,
+            )
+            DocumentType.CAFE -> copy(
+                blogEnd = true,
+                cafeKey = cafeKey + 1,
+            )
+            null -> null
+        }
+
+        fun prevPage(): PagingParam? {
+            val page = getPage()
+            if (page == 1) return null
+            return PagingParam(
+                blogKey = if (page != blogKey) blogKey else blogKey - 1,
+                blogEnd = page != blogKey,
+                cafeKey = if (page != cafeKey) cafeKey else cafeKey - 1,
+                cafeEnd = page != cafeKey,
+            )
+        }
+    }
 
     data class Option(
         val query: String,

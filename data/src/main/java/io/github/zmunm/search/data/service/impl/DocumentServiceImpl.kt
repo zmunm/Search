@@ -7,6 +7,7 @@ import io.github.zmunm.search.data.service.api.DocumentApi
 import io.github.zmunm.search.data.service.dao.ResponseError
 import io.github.zmunm.search.data.service.toEntity
 import io.github.zmunm.search.entity.DocumentList
+import io.github.zmunm.search.entity.DocumentType
 import io.github.zmunm.search.repository.KnownThrowable
 import retrofit2.HttpException
 import retrofit2.Response
@@ -29,9 +30,9 @@ internal class DocumentServiceImpl(
         sort = sort,
         page = page,
         size = size,
-    ).toResult { it.toEntity() }
+    ).toResult { it.toEntity(DocumentType.BLOG) }
         .onFailure { Timber.i(it.message) }
-        .getOrDefault(DocumentList(emptyList(), true))
+        .getOrDefault(DocumentList(emptyList(), null))
 
     override suspend fun fetchCafes(
         query: String,
@@ -43,9 +44,9 @@ internal class DocumentServiceImpl(
         sort = sort,
         page = page,
         size = size,
-    ).toResult { it.toEntity() }
+    ).toResult { it.toEntity(DocumentType.CAFE) }
         .onFailure { Timber.i(it.message) }
-        .getOrDefault(DocumentList(emptyList(), true))
+        .getOrDefault(DocumentList(emptyList(), null))
 
     private fun <T, R> Response<T>.toResult(mapper: (T) -> R): Result<R> =
         if (isSuccessful) {

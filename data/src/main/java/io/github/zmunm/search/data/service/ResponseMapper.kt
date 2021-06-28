@@ -7,7 +7,7 @@ import io.github.zmunm.search.entity.Document
 import io.github.zmunm.search.entity.DocumentList
 import io.github.zmunm.search.entity.DocumentType
 
-internal fun <T> ResponseList<T>.toEntity(): DocumentList = DocumentList(
+internal fun <T> ResponseList<T>.toEntity(type: DocumentType): DocumentList = DocumentList(
     documents.mapNotNull { responseDocument ->
         when (responseDocument) {
             is ResponseBlog -> responseDocument.toEntity()
@@ -15,7 +15,7 @@ internal fun <T> ResponseList<T>.toEntity(): DocumentList = DocumentList(
             else -> null
         }
     },
-    meta.is_end
+    if (meta.is_end) null else type
 )
 
 internal fun ResponseBlog.toEntity(): Document = Document(
